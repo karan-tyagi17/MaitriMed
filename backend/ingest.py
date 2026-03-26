@@ -1,13 +1,14 @@
-import os
-from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
+def run_ingest():
+    import os
+    from langchain_community.vectorstores import FAISS
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+    from langchain_core.documents import Document
 
-INDEX_DIR = "./faiss_index"
-EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+    INDEX_DIR = "./faiss_index"
+    EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-print("=== MaitriMed Ingestion Pipeline ===")
+    print("=== MaitriMed Ingestion Pipeline ===")
 
 docs = [
     Document(page_content="""Dengue Fever symptoms include sudden high fever, severe headache,
@@ -102,27 +103,33 @@ ASHA workers available in every village for health guidance and support.""",
     metadata={"source": "Odisha Health Department", "topic": "government_services"}),
 ]
 
-print(f"[+] Loaded {len(docs)} health documents")
+def run_ingest():
+    print(f"[+] Loaded {len(docs)} health documents")
 
-print("[*] Splitting into chunks...")
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=512,
-    chunk_overlap=64,
-    separators=["\n\n", "\n", ".", " "],
-)
-chunks = splitter.split_documents(docs)
-print(f"[+] Created {len(chunks)} chunks")
+    print("[*] Splitting into chunks...")
 
-print("[*] Loading embedding model — downloads 90MB on first run, please wait...")
-embeddings = HuggingFaceEmbeddings(
-    model_name=EMBED_MODEL,
-    model_kwargs={"device": "cpu"},
-    encode_kwargs={"normalize_embeddings": True},
-)
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=512,
+        chunk_overlap=64,
+        separators=["\n\n", "\n", ".", " "],
+    )
 
-print("[*] Building FAISS index...")
-vectorstore = FAISS.from_documents(chunks, embeddings)
-vectorstore.save_local(INDEX_DIR)
+    chunks = splitter.split_documents(docs)
 
-print(f"[+] Index saved to {INDEX_DIR}/")
-print("[OK] Done! Now run: python -m uvicorn main:app --reload --port 8000")
+    print(f"[+] Created {len(chunks)} chunks")
+
+    print("[*] Loading embedding model...")
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBED_MODEL,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
+    )
+
+    print("[*] Building FAISS index...")
+    vectorstore = FAISS.from_documents(chunks, embeddings)
+    vectorstore.save_local(INDEX_DIR)
+
+    print(f"[✓] Index saved to {INDEX_DIR}/")
+
+    if __name__ == "__main__":   
+      run_ingest()

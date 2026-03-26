@@ -68,6 +68,17 @@ def get_stats():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+
+    # 🔥 Ensure FAISS index exists
+    if not os.path.exists("faiss_index"):
+        print("[!] FAISS index not found. Running ingest...")
+        from ingest import run_ingest
+        run_ingest()
+        print("[✓] FAISS index created")
+
+    else:
+        print("[✓] FAISS index already exists")
+
     print("[✓] MaitriMed backend started")
     yield
 
