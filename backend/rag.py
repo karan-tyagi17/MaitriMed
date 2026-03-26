@@ -101,16 +101,33 @@ def query_rag(question: str) -> dict:
     chain, retriever = get_chain()
 
     response = chain.invoke(question)
-    answer = response["answer"]
+
+    # Force clean string
+    if isinstance(response, dict):
+       answer = str(response.get("answer", ""))
+    else:
+       answer = str(response)
 
     docs = retriever.invoke(question)
+
+# Ensure docs are safe
+    clean_docs = []
+    for d in docs:
+        try:
+           clean_docs.append({
+            "content": str(d.page_content),
+            "source": str(d.metadata.get("source", "Health Guidelines")),
+            "topic": str(d.metadata.get("topic", "general"))
+        })
+        except:
+          continue
 
     sources = []
     seen = set()
 
-    for doc in docs:
-        src = doc.metadata.get("source", "Health Guidelines")
-        topic = doc.metadata.get("topic", "general")
+    for doc in clean_docs:
+        src = doc["source"]
+        topic = doc["topic"]
 
         if src not in seen:
             seen.add(src)
