@@ -99,14 +99,19 @@ def get_chain():
 
 def query_rag(question: str) -> dict:
     chain, retriever = get_chain()
-    answer = chain.invoke(question)
+
+    response = chain.invoke(question)
+    answer = response["answer"]
 
     docs = retriever.invoke(question)
+
     sources = []
     seen = set()
+
     for doc in docs:
         src = doc.metadata.get("source", "Health Guidelines")
         topic = doc.metadata.get("topic", "general")
+
         if src not in seen:
             seen.add(src)
             sources.append({"name": src, "topic": topic})
