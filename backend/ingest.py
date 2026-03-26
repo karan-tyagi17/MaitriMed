@@ -1,10 +1,12 @@
-def run_ingest():
-    import os
-    from langchain_community.vectorstores import FAISS
-    from langchain_community.embeddings import HuggingFaceEmbeddings
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
-    from langchain_core.documents import Document
+import os
 
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+
+
+def run_ingest():    
     INDEX_DIR = "./faiss_index"
     EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
